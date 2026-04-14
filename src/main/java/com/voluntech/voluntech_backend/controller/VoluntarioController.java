@@ -1,5 +1,7 @@
 package com.voluntech.voluntech_backend.controller;
 
+import com.voluntech.voluntech_backend.dto.VoluntarioRequestDTO;
+import com.voluntech.voluntech_backend.dto.VoluntarioUpdateDTO;
 import com.voluntech.voluntech_backend.model.Voluntario;
 import com.voluntech.voluntech_backend.service.VoluntarioService;
 
@@ -22,13 +24,8 @@ public class VoluntarioController {
     private VoluntarioService service;
 
     @PostMapping
-    @Operation(summary = "Cadastrar novo voluntário", description = "Cria um registro de voluntário com nome, CPF, e-mail e senha.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Voluntário cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos (erro de validação ou duplicidade)"),
-            @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
-    })
-    public Voluntario cadastrar(@Valid @RequestBody Voluntario voluntario) {
+    @Operation(summary = "Cadastrar novo voluntário")
+    public Voluntario cadastrar(@Valid @RequestBody VoluntarioRequestDTO voluntario) {
         return service.salvar(voluntario);
     }
 
@@ -47,16 +44,16 @@ public class VoluntarioController {
     @PutMapping("/{id}")
     @Operation(summary = "Editar dados do voluntário", description = "Atualiza nome de um voluntário existente.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "ID não encontrado")    
+            @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
-    public Voluntario atualizar(@Valid @PathVariable Long id, @RequestBody Voluntario voluntario) {
+    public Voluntario atualizar(@Valid @PathVariable Long id, @RequestBody VoluntarioUpdateDTO voluntario) {
         return service.atualizar(id, voluntario);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir voluntário", description = "Remove permanentemente um voluntário do banco de dados.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "ID não encontrado")    
+            @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
     public void excluir(@PathVariable Long id) {
         service.excluir(id);
