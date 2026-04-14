@@ -24,25 +24,14 @@ public class Voluntario {
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "O nome é obrigatório")
-    @Size(min = 3, max = 100, message = "O nome deve conter entre 3 e 100 caracteres")
-    @Schema(example = "João da Silva", description = "Nome completo do voluntário")
     private String nome;
 
     @Column(nullable = false, unique = true)
-    @CPF(message = "CPF inválido")
-    @NotBlank(message = "O CPF é obrigatório")
-    @Schema(description = "CPF do voluntário (deve ser único e válido)")
     private String cpf;
 
     @Column(nullable = false, unique = true)
-    @Email(message = "E-mail inválido")
-    @NotBlank(message = "O e-mail é obrigatório")
-    @Schema(example = "joao.silva@email.com")
     private String email;
 
     @Column(nullable = false)
-    @Size(min = 6, max = 12, message = "A senha deve ter entre 6 e 12 caracteres")
-    @jakarta.validation.constraints.Pattern(regexp = "^\\S+$", message = "A senha não pode conter espaços")
     private String senha;
 }
