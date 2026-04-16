@@ -10,7 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Libera todos os endpoints da API
-                .allowedOrigins("http://localhost:4200") // Permite apenas o seu Angular local
+                .allowedOrigins("http://localhost:4200",
+                 "https://ohana-voluntech.netlify.app")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
                 .allowedHeaders("*") // Permite todos os headers (importante para Content-Type, Authorization, etc)
                 .allowCredentials(true); // Permite envio de cookies/autenticação se necessário
