@@ -1,5 +1,7 @@
 package com.voluntech.voluntech_backend.config;
 
+import org.springframework.dao.DataIntegrityViolationException; // Importante adicionar este import
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,7 +11,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    // 1. Captura erros de @Valid (Validation do Hibernate)
+    // 1. Captura erros de @Valid (Validation do Hibernate) - STATUS 400
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity tratarErro400(MethodArgumentNotValidException ex) {
         var erros = ex.getFieldErrors().stream()
@@ -19,7 +21,14 @@ public class ErrorHandler {
         return ResponseEntity.badRequest().body(erros);
     }
 
-    // 2. Captura erros de Duplicidade ou Negócio que lançamos no Service
+    // 2. NOVO: Captura duplicidade no Banco de Dados (Email/CPF/CNPJ repetido) - STATUS 409
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity tratarErro409(DataIntegrityViolationException ex) {
+        // Retornamos 409 (Conflict) em vez de 400
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail, CPF ou CNPJ já cadastrado no sistema.");
+    }
+
+    // 3. Captura erros genéricos de negócio - STATUS 400
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> tratarErroNegocio(RuntimeException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
