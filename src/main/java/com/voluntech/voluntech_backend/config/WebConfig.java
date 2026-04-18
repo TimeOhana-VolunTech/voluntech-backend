@@ -10,7 +10,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Libera todos os endpoints da API
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns(
+                    "http://localhost:4200", 
+                    "https://voluntech-frontend.netlify.app",
+                    "https://--ohana-voluntech.netlify.app", // Padrão para os deploys do Netlify
+                    "https://*.netlify.app" // Aceita qualquer preview ou subdomínio do Netlify
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
                 .allowedHeaders("*") // Permite todos os headers (importante para Content-Type, Authorization, etc)
                 .allowCredentials(true); // Permite envio de cookies/autenticação se necessário
