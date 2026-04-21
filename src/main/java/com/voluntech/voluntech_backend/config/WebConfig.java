@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
                     "https://--ohana-voluntech.netlify.app", // Padrão para os deploys do Netlify
                     "https://*.netlify.app" // Aceita qualquer preview ou subdomínio do Netlify
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // Métodos permitidos
                 .allowedHeaders("*") // Permite todos os headers (importante para Content-Type, Authorization, etc)
                 .allowCredentials(true); // Permite envio de cookies/autenticação se necessário
     }

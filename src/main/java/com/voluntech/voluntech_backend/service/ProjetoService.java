@@ -57,6 +57,54 @@ public class ProjetoService {
                 .collect(Collectors.toList());
     }
 
+    public ProjetoResponseDTO buscarPorId(Long id) {
+        Projeto projeto = projetoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+        return converterParaResponseDTO(projeto);
+    }
+
+    @Transactional
+    public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
+        // 1. Verificar se o projeto existe
+        Projeto projeto = projetoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+
+
+        // 3. Atualizar os campos
+        projeto.setTitulo(dto.titulo());
+        projeto.setDescricao(dto.descricao());
+        projeto.setPrazo(dto.prazo());
+        projeto.setModalidade(dto.modalidade());
+        projeto.setCategoria(dto.categoria());
+
+        // 4. Salvar e retornar
+        Projeto projetoAtualizado = projetoRepository.save(projeto);
+        return converterParaResponseDTO(projetoAtualizado);
+    }
+
+
+    @Transactional
+    public ProjetoResponseDTO alterarStatus(Long id, StatusProjeto novoStatus) {
+        Projeto projeto = projetoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+
+        projeto.setStatus(novoStatus);
+        
+        Projeto projetoSalvo = projetoRepository.save(projeto);
+        return converterParaResponseDTO(projetoSalvo);
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        Projeto projeto = projetoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+
+        // Regra de Negócio: Exclusão só é permitida sem candidatos
+        // Por enquanto, como não há tabela de inscrições, a exclusão é livre.
+        projetoRepository.delete(projeto);
+    }
+
+
     // Método auxiliar para transformar Entity em DTO de saída
     private ProjetoResponseDTO converterParaResponseDTO(Projeto projeto) {
         return new ProjetoResponseDTO(
