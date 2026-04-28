@@ -7,6 +7,9 @@ import com.voluntech.voluntech_backend.model.Projeto;
 import com.voluntech.voluntech_backend.model.enums.StatusProjeto;
 import com.voluntech.voluntech_backend.repository.OngRepository;
 import com.voluntech.voluntech_backend.repository.ProjetoRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,12 @@ public class ProjetoService {
     @Autowired
     private OngRepository ongRepository;
 
+    // Método auxiliar privado para evitar repetição de código e garantir o 404
+    private Projeto buscarProjetoPorId(Long id) {
+        return projetoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado com o ID: " + id));
+    }
+
     @Transactional
     public ProjetoResponseDTO criar(ProjetoRequestDTO dto) {
         // 1. Buscar a ONG (Garante que o projeto será vinculado a uma ONG existente)
@@ -39,7 +48,7 @@ public class ProjetoService {
         projeto.setCategoria(dto.categoria());
         projeto.setOng(ong);
         
-        // Regras de Negócio (H04)
+        // Regras de Negócio
         projeto.setStatus(StatusProjeto.ATIVA);
         projeto.setDataCriacao(LocalDate.now());
 
@@ -58,47 +67,36 @@ public class ProjetoService {
     }
 
     public ProjetoResponseDTO buscarPorId(Long id) {
-        Projeto projeto = projetoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
-        return converterParaResponseDTO(projeto);
+        // Reutiliza o método privado
+        return converterParaResponseDTO(buscarProjetoPorId(id));
     }
 
     @Transactional
     public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
-        // 1. Verificar se o projeto existe
-        Projeto projeto = projetoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
+        // Agora dispara 404 corretamente através do método auxiliar
+        Projeto projeto = buscarProjetoPorId(id);
 
-
-        // 3. Atualizar os campos
         projeto.setTitulo(dto.titulo());
         projeto.setDescricao(dto.descricao());
         projeto.setPrazo(dto.prazo());
         projeto.setModalidade(dto.modalidade());
         projeto.setCategoria(dto.categoria());
 
-        // 4. Salvar e retornar
-        Projeto projetoAtualizado = projetoRepository.save(projeto);
-        return converterParaResponseDTO(projetoAtualizado);
+        return converterParaResponseDTO(projetoRepository.save(projeto));
     }
 
 
     @Transactional
     public ProjetoResponseDTO alterarStatus(Long id, StatusProjeto novoStatus) {
-        Projeto projeto = projetoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
-
+        Projeto projeto = buscarProjetoPorId(id);
         projeto.setStatus(novoStatus);
         
-        Projeto projetoSalvo = projetoRepository.save(projeto);
-        return converterParaResponseDTO(projetoSalvo);
+        return converterParaResponseDTO(projetoRepository.save(projeto));
     }
 
     @Transactional
     public void excluir(Long id) {
-        Projeto projeto = projetoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o ID: " + id));
-
+        Projeto projeto = buscarProjetoPorId(id);
         // Regra de Negócio: Exclusão só é permitida sem candidatos
         // Por enquanto, como não há tabela de inscrições, a exclusão é livre.
         projetoRepository.delete(projeto);
