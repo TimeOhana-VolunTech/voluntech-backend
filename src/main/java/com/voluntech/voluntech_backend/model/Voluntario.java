@@ -28,4 +28,6 @@ public class Voluntario {
 
     @Column(nullable = false)
     private String senha;
+
+    
 }

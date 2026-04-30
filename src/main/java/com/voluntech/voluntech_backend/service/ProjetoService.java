@@ -4,6 +4,8 @@ import com.voluntech.voluntech_backend.dto.ProjetoRequestDTO;
 import com.voluntech.voluntech_backend.dto.ProjetoResponseDTO;
 import com.voluntech.voluntech_backend.model.Ong;
 import com.voluntech.voluntech_backend.model.Projeto;
+import com.voluntech.voluntech_backend.model.enums.Categoria;
+import com.voluntech.voluntech_backend.model.enums.Modalidade;
 import com.voluntech.voluntech_backend.model.enums.StatusProjeto;
 import com.voluntech.voluntech_backend.repository.OngRepository;
 import com.voluntech.voluntech_backend.repository.ProjetoRepository;
@@ -100,6 +102,13 @@ public class ProjetoService {
         // Regra de Negócio: Exclusão só é permitida sem candidatos
         // Por enquanto, como não há tabela de inscrições, a exclusão é livre.
         projetoRepository.delete(projeto);
+    }
+
+    public List<ProjetoResponseDTO> explorarProjetos(Categoria categoria, Modalidade modalidade, String termo) {
+        return projetoRepository.buscarOportunidades(categoria, modalidade, termo)
+                .stream()
+                .map(this::converterParaResponseDTO)
+                .collect(Collectors.toList());
     }
 
 

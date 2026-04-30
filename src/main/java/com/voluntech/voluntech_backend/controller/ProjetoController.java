@@ -3,6 +3,8 @@ package com.voluntech.voluntech_backend.controller;
 import com.voluntech.voluntech_backend.dto.ProjetoRequestDTO;
 import com.voluntech.voluntech_backend.dto.ProjetoResponseDTO;
 import com.voluntech.voluntech_backend.model.Projeto;
+import com.voluntech.voluntech_backend.model.enums.Categoria;
+import com.voluntech.voluntech_backend.model.enums.Modalidade;
 import com.voluntech.voluntech_backend.model.enums.StatusProjeto;
 import com.voluntech.voluntech_backend.service.ProjetoService;
 
@@ -68,6 +70,17 @@ public class ProjetoController {
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
         projetoService.excluir(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Explorar oportunidades", description = "Lista todos os projetos ativos com filtros opcionais para voluntários.")
+    @GetMapping("/explorar")
+    public ResponseEntity<List<ProjetoResponseDTO>> explorar(
+            @RequestParam(required = false) Categoria categoria,
+            @RequestParam(required = false) Modalidade modalidade,
+            @RequestParam(required = false) String termo) {
+        
+        List<ProjetoResponseDTO> oportunidades = projetoService.explorarProjetos(categoria, modalidade, termo);
+        return ResponseEntity.ok(oportunidades);
     }
 
 }
