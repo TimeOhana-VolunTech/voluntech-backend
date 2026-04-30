@@ -58,4 +58,6 @@ public class VoluntarioController {
     public void excluir(@PathVariable Long id) {
         service.excluir(id);
     }
+
+    
 }
