@@ -54,20 +54,29 @@ public class VoluntarioService {
     }
 
     @Transactional
-    public Voluntario atualizar(Long id, VoluntarioUpdateDTO voluntario) {
-        // Buscamos o voluntário existente para garantir que ele existe
+    public Voluntario atualizar(Long id, VoluntarioUpdateDTO voluntarioDto) {
+        // 1. Buscamos o voluntário existente
         Voluntario voluntarioExistente = buscarPorId(id);
 
-        // Validar se o novo e-mail já pertence a outra pessoa
-        if (!voluntarioExistente.getEmail().equals(voluntario.email()) && 
-            repository.existsByEmail(voluntario.email())) {
+        // 2. Validação de e-mail (Mantenha sua lógica atual, ela está correta)
+        if (!voluntarioExistente.getEmail().equals(voluntarioDto.email()) && 
+            repository.existsByEmail(voluntarioDto.email())) {
             throw new RuntimeException("O novo e-mail já está em uso por outro usuário.");
         }
 
-        // Atualizamos os campos (exceto o ID e o CPF, que geralmente são fixos)
-        voluntarioExistente.setNome(voluntario.nome());
-        voluntarioExistente.setEmail(voluntario.email());
+        // 3. Atualizamos os campos básicos
+        voluntarioExistente.setNome(voluntarioDto.nome());
+        voluntarioExistente.setEmail(voluntarioDto.email());
 
+        // 4. ATUALIZAÇÃO DOS NOVOS CAMPOS DO ONBOARDING
+        voluntarioExistente.setTelefone(voluntarioDto.telefone());
+        voluntarioExistente.setHabilidades(voluntarioDto.habilidades());
+        voluntarioExistente.setCausas(voluntarioDto.causas());
+        voluntarioExistente.setBio(voluntarioDto.bio());
+        voluntarioExistente.setDisponibilidades(voluntarioDto.disponibilidades());
+        voluntarioExistente.setOnboardingCompleto(voluntarioDto.onboardingCompleto());
+
+        // 5. Salva as alterações
         return repository.save(voluntarioExistente);
     }
     
