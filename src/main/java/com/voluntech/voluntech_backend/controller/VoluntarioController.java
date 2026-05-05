@@ -42,9 +42,10 @@ public class VoluntarioController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Editar dados do voluntário", description = "Atualiza nome de um voluntário existente.")
+    @Operation(summary = "Atualizar perfil do voluntário", description = "Permite a edição completa dos dados de perfil, habilidades, causas e bio.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "404", description = "ID não encontrado")
+        @ApiResponse(responseCode = "200", description = "Perfil atualizado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Voluntário não encontrado")
     })
     public Voluntario atualizar(@Valid @PathVariable Long id, @RequestBody VoluntarioUpdateDTO voluntario) {
         return service.atualizar(id, voluntario);

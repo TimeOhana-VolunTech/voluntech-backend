@@ -64,16 +64,18 @@ public class VoluntarioService {
             throw new RuntimeException("O novo e-mail já está em uso por outro usuário.");
         }
 
-        // 3. Atualizamos os campos básicos
+        // 3. Arualiza os campos básicos
         voluntarioExistente.setNome(voluntarioDto.nome());
         voluntarioExistente.setEmail(voluntarioDto.email());
-
-        // 4. ATUALIZAÇÃO DOS NOVOS CAMPOS DO ONBOARDING
         voluntarioExistente.setTelefone(voluntarioDto.telefone());
-        voluntarioExistente.setHabilidades(voluntarioDto.habilidades());
-        voluntarioExistente.setCausas(voluntarioDto.causas());
         voluntarioExistente.setBio(voluntarioDto.bio());
-        voluntarioExistente.setDisponibilidades(voluntarioDto.disponibilidades());
+
+        // Proteção contra Listas Nulas (Evita NullPointerException)
+        voluntarioExistente.setHabilidades(voluntarioDto.habilidades() != null ? voluntarioDto.habilidades() : List.of());
+        voluntarioExistente.setCausas(voluntarioDto.causas() != null ? voluntarioDto.causas() : List.of());
+        voluntarioExistente.setDisponibilidades(voluntarioDto.disponibilidades() != null ? voluntarioDto.disponibilidades() : List.of());
+
+        // Mantemos a flag de onboarding (geralmente enviamos true na edição)
         voluntarioExistente.setOnboardingCompleto(voluntarioDto.onboardingCompleto());
 
         // 5. Salva as alterações
