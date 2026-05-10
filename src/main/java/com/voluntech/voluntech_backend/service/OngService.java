@@ -38,7 +38,7 @@ public class OngService {
 
         return repository.save(novaOng);
     }
-
+      
     public List<Ong> listarTodas() {
         return repository.findAll();
     }

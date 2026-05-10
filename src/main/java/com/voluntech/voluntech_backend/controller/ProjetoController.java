@@ -67,9 +67,14 @@ public class ProjetoController {
 
     @Operation(summary = "Excluir projeto", description = "Remove um projeto do sistema. Regra: Apenas se não houver voluntários inscritos.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        projetoService.excluir(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> excluir(@PathVariable Long id) {
+        try {
+            projetoService.excluir(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            // Retorna o erro 400 (Bad Request) com a mensagem personalizada
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @Operation(summary = "Explorar oportunidades", description = "Lista todos os projetos ativos com filtros opcionais para voluntários.")
@@ -81,6 +86,13 @@ public class ProjetoController {
         
         List<ProjetoResponseDTO> oportunidades = projetoService.explorarProjetos(categoria, modalidade, termo);
         return ResponseEntity.ok(oportunidades);
+    }
+
+    @Operation(summary = "Candidatar-se a um projeto", description = "Vincula o voluntário logado a uma oportunidade.")
+    @PostMapping("/{projetoId}/candidatar")
+    public ResponseEntity<String> candidatar(@PathVariable Long projetoId, @RequestParam Long voluntarioId) {
+        projetoService.candidatar(projetoId, voluntarioId);
+        return ResponseEntity.ok("Candidatura realizada com sucesso!");
     }
 
 }
