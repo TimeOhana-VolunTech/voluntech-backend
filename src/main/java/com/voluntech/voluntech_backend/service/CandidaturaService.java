@@ -4,10 +4,12 @@ import com.voluntech.voluntech_backend.dto.CandidatoExibicaoDTO;
 import com.voluntech.voluntech_backend.dto.CandidaturaRequestDTO;
 import com.voluntech.voluntech_backend.dto.CandidaturaResponseDTO;
 import com.voluntech.voluntech_backend.model.Candidatura;
+import com.voluntech.voluntech_backend.model.Notificacao;
 import com.voluntech.voluntech_backend.model.Projeto;
 import com.voluntech.voluntech_backend.model.Voluntario;
 import com.voluntech.voluntech_backend.model.enums.StatusCandidatura;
 import com.voluntech.voluntech_backend.repository.CandidaturaRepository;
+import com.voluntech.voluntech_backend.repository.NotificacaoRepository;
 import com.voluntech.voluntech_backend.repository.ProjetoRepository;
 import com.voluntech.voluntech_backend.repository.VoluntarioRepository;
 
@@ -32,8 +34,15 @@ public class CandidaturaService {
     @Autowired
     private VoluntarioRepository voluntarioRepository;
 
+    @Autowired
+    private NotificacaoRepository notificacaoRepository;
+
     @Transactional
     public void salvar(CandidaturaRequestDTO dto) {
+
+        //System.out.println(">>> Tentando salvar candidatura. Projeto ID recebido: " + dto.projetoId());
+        //System.out.println(">>> Tentando salvar candidatura. Voluntário ID recebido: " + dto.voluntarioId());
+
         // 1. Validação: Verificar se o voluntário já está inscrito para evitar duplicidade
         boolean jaExiste = candidaturaRepository
             .findByVoluntarioIdAndProjetoId(dto.voluntarioId(), dto.projetoId())
@@ -58,6 +67,13 @@ public class CandidaturaService {
         candidatura.setStatus(StatusCandidatura.PENDENTE); // Status inicial padrão
 
         candidaturaRepository.save(candidatura);
+
+        // GATILHO 1: Notificar a ONG que há um novo interessado
+        Notificacao notif = new Notificacao();
+        notif.setDestinatarioId(projeto.getOng().getId());
+        notif.setTipoUsuario("ONG");
+        notif.setMensagem("Novo voluntário inscrito no projeto: " + projeto.getTitulo());
+        notificacaoRepository.save(notif);
     }
 
     public List<CandidaturaResponseDTO> listarCandidaturasDoVoluntario(Long voluntarioId) {
@@ -90,6 +106,18 @@ public class CandidaturaService {
                 .orElseThrow(() -> new RuntimeException("Candidatura não encontrada"));
         candidatura.setStatus(novoStatus);
         candidaturaRepository.save(candidatura);
+
+        // GATILHO 2: Notificar o Voluntário sobre o resultado
+        Notificacao notif = new Notificacao();
+        notif.setDestinatarioId(candidatura.getVoluntario().getId());
+        notif.setTipoUsuario("VOLUNTARIO");
+        
+        String msg = novoStatus.toString().equals("APROVADO") 
+            ? "Parabéns! Você foi aprovado para o projeto: " 
+            : "Infelizmente sua candidatura não foi selecionada para: ";
+            
+        notif.setMensagem(msg + candidatura.getProjeto().getTitulo());
+        notificacaoRepository.save(notif);
     }
 
 

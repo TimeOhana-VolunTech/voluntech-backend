@@ -12,5 +12,6 @@ public record ProjetoResponseDTO(
     String modalidade,
     String categoria,
     Long ongId,
-    String nomeOng
+    String nomeOng,
+    long totalCandidatosPendentes
 ) {}
