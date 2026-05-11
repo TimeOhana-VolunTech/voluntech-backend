@@ -1,6 +1,8 @@
 package com.voluntech.voluntech_backend.repository;
 
 import com.voluntech.voluntech_backend.model.Candidatura;
+import com.voluntech.voluntech_backend.model.enums.StatusCandidatura;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +24,7 @@ public interface CandidaturaRepository extends JpaRepository<Candidatura, Long> 
 
     // Deleta todas as candidaturas de um projeto (usaremos para limpar os recusados antes de excluir o projeto)
     void deleteByProjetoId(Long projetoId);
+
+    // Conta especificamente candidaturas que a ONG ainda não avaliou
+    long countByProjetoIdAndStatus(Long projetoId, StatusCandidatura status);
 }

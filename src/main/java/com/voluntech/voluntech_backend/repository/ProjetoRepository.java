@@ -30,4 +30,6 @@ public interface ProjetoRepository extends JpaRepository<Projeto, Long> {
 
     @Query("SELECT p FROM Projeto p WHERE p.status != 'FINALIZADA' AND p.prazo <= :data")
     List<Projeto> buscarProjetosParaFinalizar(@Param("data") LocalDate data);
+
+    List<Projeto> findByPrazoAndStatus(LocalDate prazo, StatusProjeto status);
 }

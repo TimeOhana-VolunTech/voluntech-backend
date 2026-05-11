@@ -1,15 +1,19 @@
 package com.voluntech.voluntech_backend.service;
 
+import com.voluntech.voluntech_backend.dto.CandidaturaRequestDTO;
 import com.voluntech.voluntech_backend.dto.ProjetoRequestDTO;
 import com.voluntech.voluntech_backend.dto.ProjetoResponseDTO;
 import com.voluntech.voluntech_backend.model.Candidatura;
+import com.voluntech.voluntech_backend.model.Notificacao;
 import com.voluntech.voluntech_backend.model.Ong;
 import com.voluntech.voluntech_backend.model.Projeto;
 import com.voluntech.voluntech_backend.model.Voluntario;
 import com.voluntech.voluntech_backend.model.enums.Categoria;
 import com.voluntech.voluntech_backend.model.enums.Modalidade;
+import com.voluntech.voluntech_backend.model.enums.StatusCandidatura;
 import com.voluntech.voluntech_backend.model.enums.StatusProjeto;
 import com.voluntech.voluntech_backend.repository.CandidaturaRepository;
+import com.voluntech.voluntech_backend.repository.NotificacaoRepository;
 import com.voluntech.voluntech_backend.repository.OngRepository;
 import com.voluntech.voluntech_backend.repository.ProjetoRepository;
 import com.voluntech.voluntech_backend.repository.VoluntarioRepository;
@@ -39,6 +43,12 @@ public class ProjetoService {
 
     @Autowired
     private CandidaturaRepository candidaturaRepository;
+
+    @Autowired
+    private NotificacaoRepository notificacaoRepository;
+
+    @Autowired
+    private CandidaturaService candidaturaService;
 
     // Método auxiliar privado para evitar repetição de código e garantir o 404
     private Projeto buscarProjetoPorId(Long id) {
@@ -136,24 +146,27 @@ public class ProjetoService {
 
     @Transactional
     public void candidatar(Long projetoId, Long voluntarioId) {
-        // 1. Validar se o projeto existe
-        Projeto projeto = buscarProjetoPorId(projetoId);
+        // Em vez de duplicar a lógica aqui, chame o método salvar que já tem a notificação!
+        CandidaturaRequestDTO dto = new CandidaturaRequestDTO(projetoId, voluntarioId);
+        candidaturaService.salvar(dto);
+    }
 
-        // 2. Validar se o voluntário existe
-        Voluntario voluntario = voluntarioRepository.findById(voluntarioId)
-                .orElseThrow(() -> new EntityNotFoundException("Voluntário não encontrado"));
 
-        // 3. Regra de Negócio: Não permitir candidatura duplicada
-        if (candidaturaRepository.findByVoluntarioIdAndProjetoId(voluntarioId, projetoId).isPresent()) {
-            throw new RuntimeException("Você já está inscrito neste projeto.");
-        }
-
-        // 4. Salvar candidatura
-        Candidatura candidatura = new Candidatura();
-        candidatura.setProjeto(projeto);
-        candidatura.setVoluntario(voluntario);
+    @Scheduled(cron = "0 0 0 * * *") // Roda todo dia às 08:00 da manhã
+    @Transactional
+    public void alertarPrazosProximos() {
+        // Busca projetos que vencem amanhã
+        LocalDate amanha = LocalDate.now().plusDays(1);
         
-        candidaturaRepository.save(candidatura);
+        List<Projeto> vencemAmanha = projetoRepository.findByPrazoAndStatus(amanha, StatusProjeto.ATIVA);
+
+        vencemAmanha.forEach(p -> {
+            Notificacao notif = new Notificacao();
+            notif.setDestinatarioId(p.getOng().getId());
+            notif.setTipoUsuario("ONG");
+            notif.setMensagem("Atenção: O prazo de inscrição para o projeto '" + p.getTitulo() + "' encerra amanhã!");
+            notificacaoRepository.save(notif);
+        });
     }
 
 
@@ -173,6 +186,13 @@ public class ProjetoService {
         paraFinalizar.forEach(p -> {
             p.setStatus(StatusProjeto.FINALIZADA);
             System.out.println(">>> Projeto [" + p.getTitulo() + "] FINALIZADO automaticamente por decurso de prazo.");
+
+            // Notifica a ONG que o projeto foi encerrado pelo sistema
+            Notificacao notif = new Notificacao();
+            notif.setDestinatarioId(p.getOng().getId());
+            notif.setTipoUsuario("ONG");
+            notif.setMensagem("O projeto '" + p.getTitulo() + "' foi finalizado automaticamente devido ao prazo.");
+            notificacaoRepository.save(notif);
         });
 
         projetoRepository.saveAll(paraFinalizar);
@@ -181,6 +201,9 @@ public class ProjetoService {
 
     // Método auxiliar para transformar Entity em DTO de saída
     private ProjetoResponseDTO converterParaResponseDTO(Projeto projeto) {
+
+        long pendentes = candidaturaRepository.countByProjetoIdAndStatus(projeto.getId(), StatusCandidatura.PENDENTE);
+
         return new ProjetoResponseDTO(
                 projeto.getId(),
                 projeto.getTitulo(),
@@ -190,7 +213,8 @@ public class ProjetoService {
                 projeto.getModalidade()!= null ? projeto.getModalidade().toString() : null,
                 projeto.getCategoria() != null ? projeto.getCategoria().toString() : null,
                 projeto.getOng().getId(),
-                projeto.getOng().getNome()
-        );
+                projeto.getOng().getNome(),
+                pendentes
+            );
     }
 }
