@@ -16,7 +16,6 @@ public class Projeto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Retiramos as mensagens de erro, pois o DTO já cuida disso
     @Column(nullable = false)
     private String titulo;
 

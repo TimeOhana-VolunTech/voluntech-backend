@@ -27,7 +27,6 @@ public class VoluntarioService {
             throw new RuntimeException("Este CPF já está cadastrado.");
         }
 
-        // Mapeamento manual do DTO para Entity
         Voluntario novoVoluntario = new Voluntario();
         novoVoluntario.setNome(voluntario.nome());
         novoVoluntario.setCpf(voluntario.cpf());
@@ -48,37 +47,31 @@ public class VoluntarioService {
 
     @Transactional
     public void excluir(Long id) {
-        // Refinamento: Buscamos antes para disparar o 404 caso não exista
+
         Voluntario voluntario = buscarPorId(id); 
         repository.delete(voluntario);
     }
 
     @Transactional
     public Voluntario atualizar(Long id, VoluntarioUpdateDTO voluntarioDto) {
-        // 1. Buscamos o voluntário existente
         Voluntario voluntarioExistente = buscarPorId(id);
 
-        // 2. Validação de e-mail (Mantenha sua lógica atual, ela está correta)
         if (!voluntarioExistente.getEmail().equals(voluntarioDto.email()) && 
             repository.existsByEmail(voluntarioDto.email())) {
             throw new RuntimeException("O novo e-mail já está em uso por outro usuário.");
         }
 
-        // 3. Arualiza os campos básicos
         voluntarioExistente.setNome(voluntarioDto.nome());
         voluntarioExistente.setEmail(voluntarioDto.email());
         voluntarioExistente.setTelefone(voluntarioDto.telefone());
         voluntarioExistente.setBio(voluntarioDto.bio());
 
-        // Proteção contra Listas Nulas (Evita NullPointerException)
         voluntarioExistente.setHabilidades(voluntarioDto.habilidades() != null ? voluntarioDto.habilidades() : List.of());
         voluntarioExistente.setCausas(voluntarioDto.causas() != null ? voluntarioDto.causas() : List.of());
         voluntarioExistente.setDisponibilidades(voluntarioDto.disponibilidades() != null ? voluntarioDto.disponibilidades() : List.of());
 
-        // Mantemos a flag de onboarding (geralmente enviamos true na edição)
         voluntarioExistente.setOnboardingCompleto(voluntarioDto.onboardingCompleto());
 
-        // 5. Salva as alterações
         return repository.save(voluntarioExistente);
     }
     
