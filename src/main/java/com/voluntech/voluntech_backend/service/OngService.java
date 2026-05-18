@@ -18,7 +18,7 @@ public class OngService {
     @Autowired
     private OngRepository repository;
 
-    @Transactional // Garante a integridade da transação
+    @Transactional 
     public Ong salvar(OngRequestDTO ong) {
 
         if (repository.existsByEmail(ong.email())) {
@@ -28,7 +28,6 @@ public class OngService {
             throw new RuntimeException("Este CNPJ já está cadastrado.");
         }
 
-        // Convertendo DTO para Entity
         Ong novaOng = new Ong();
         novaOng.setNome(ong.nome());
         novaOng.setEmail(ong.email());
@@ -58,7 +57,6 @@ public class OngService {
     public Ong atualizar(Long id, OngUpdateDTO ong) {
         Ong ongExistente = buscarPorId(id);
 
-        // Se o e-mail mudou, verifica se o novo já existe
         if (!ongExistente.getEmail().equals(ong.email()) && repository.existsByEmail(ong.email())) {
             throw new RuntimeException("O novo e-mail já está em uso por outra instituição.");
         }

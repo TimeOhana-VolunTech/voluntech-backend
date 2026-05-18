@@ -34,7 +34,7 @@ public class Voluntario {
 
     private String telefone;
 
-    @ElementCollection // Cria uma tabela auxiliar automaticamente para as strings
+    @ElementCollection 
     @Column(name = "habilidade")
     private List<String> habilidades;
 

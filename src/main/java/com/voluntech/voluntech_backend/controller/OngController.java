@@ -42,14 +42,15 @@ public class OngController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Editar dados da Ong", description = "Atualiza nome, razão social de uma Ong existente.")
+    @Operation(summary = "Editar dados da ONG", description = "Atualiza nome, e-mail e razão social de uma ONG existente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "404", description = "ID não encontrado")
     })
-    public Ong atualizar(@Valid @PathVariable @RequestBody Long id, @RequestBody OngUpdateDTO ong) {
+    public Ong atualizar(@PathVariable Long id, @Valid @RequestBody OngUpdateDTO ong) {
         return service.atualizar(id, ong);
     }
 
+    
     @DeleteMapping("/{id}")
     @Operation(summary = "Excluir Ong", description = "Remove permanentemente uma Ong do banco de dados.")
     @ApiResponses(value = {

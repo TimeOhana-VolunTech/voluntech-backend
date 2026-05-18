@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "ongs")
-@Data // Gera getters, setters, equals e hashcode automaticamente
+@Data 
 public class Ong {
 
     @Id

@@ -20,7 +20,7 @@ public record ProjetoRequestDTO(
 
     @NotBlank(message = "A descrição é obrigatória")
     @Size(min = 10, max = 1000, message = "A descrição deve ter entre 10 e 1000 caracteres")
-    @Schema(example = "Projeto voltado para o ensino básico de leitura e escrita...")
+    @Schema(example = "Vaga de projeto voltado para o ensino básico de leitura e escrita...")
     String descricao,
 
     @NotNull(message = "O prazo é obrigatório")

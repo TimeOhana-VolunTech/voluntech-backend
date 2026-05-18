@@ -17,6 +17,9 @@ public interface ProjetoRepository extends JpaRepository<Projeto, Long> {
     List<Projeto> findByOngIdOrderByDataCriacaoDesc(Long ongId);
 
     @Query("SELECT p FROM Projeto p WHERE p.status = 'ATIVA' " +
+       "AND (:voluntarioId IS NULL OR NOT EXISTS (" +
+       "    SELECT c FROM Candidatura c WHERE c.projeto.id = p.id AND c.voluntario.id = :voluntarioId" +
+       ")) " +
        "AND (:categoria IS NULL OR p.categoria = :categoria) " +
        "AND (:modalidade IS NULL OR p.modalidade = :modalidade) " +
        "AND (:termo IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
@@ -25,7 +28,8 @@ public interface ProjetoRepository extends JpaRepository<Projeto, Long> {
     List<Projeto> buscarOportunidades(
         @Param("categoria") Categoria categoria, 
         @Param("modalidade") Modalidade modalidade, 
-        @Param("termo") String termo
+        @Param("termo") String termo,
+        @Param("voluntarioId") Long voluntarioId
     );
 
     @Query("SELECT p FROM Projeto p WHERE p.status != 'FINALIZADA' AND p.prazo <= :data")
